@@ -7,21 +7,24 @@ const port = process.env.PORT || 3000;
 var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
+var {generateMessage} = require('./utils/message');
 
 app.use(express.static(publicPath));
 
 io.on('connection' ,(socket)=>{
 console.log('New User Connected');
 
-
-socket.on('createMsg', (msg)=>{
+socket.emit('newMsg',generateMessage(
+    'Admin' ,
+    'Welcome to App'
+));
+socket.broadcast.emit('newMsg',generateMessage(
+    'Admin',
+    'A new User has Joined'
+));
+ socket.on('createMsg', (msg)=>{
   console.log('CreatedMsg',msg);
-  io.emit('newMsg',{
-    from: msg.from,
-    text : msg.text,
-    createdAt : new Date().getTime()
-
-  });
+  io.emit('newMsg',generateMessage(msg.from , msg.text));
 });
 
 socket.on('disconnect' , ()=>{
